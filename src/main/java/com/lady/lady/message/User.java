@@ -40,12 +40,8 @@ public class User implements IUser{
                 String insertSql = String.format("INSERT INTO `user` (`id`, `username`, `password`) VALUES ('%s', '%s', '%s');", sb.toString(), username
                         , password);
                 PreparedStatement preparedStatement = conn.prepareStatement(insertSql);
-                boolean execute = preparedStatement.execute();
-                if (execute) {
-                    return sb.toString();
-                }else{
-                    return "0";
-                }
+                boolean execute = preparedStatement.execute(insertSql);
+                return sb.toString();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
