@@ -1,5 +1,8 @@
 package com.lady.lady.message;
 
+import com.lady.lady.entry.MessageEntry;
+import com.lady.lady.entry.UserEntry;
+import com.lady.lady.util.SqlUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +11,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 @RestController
@@ -17,56 +25,46 @@ public class User implements IUser{
     @Override
     @ApiOperation("注册")
     public String register(String username, String password) {
-        File file = new File("../../../../../../../../user.txt");
-        if (!file.exists()){
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        try {
-            List<String> strings = Files.readAllLines(file.toPath());
-            for (String string : strings) {
-                String[] split = string.split("@");
-                if (username.equals(split[0]) && password.equals(split[1])){
+        try(Connection conn = SqlUtil.makeConnection()) {
+            String sql = "select * from user where username=" + username ;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return "0";
+            } else {
+                char[] chars = String.valueOf(new Date().getTime()).toCharArray();
+                StringBuffer sb = new StringBuffer();
+                for (int i = 5; i <= 12; i++) {
+                    sb.append(chars[i]);
+                }
+                String insertSql = String.format("INSERT INTO `user` (`id`, `username`, `password`) VALUES ('%s', '%s', '%s');", sb.toString(), username
+                        , password);
+                PreparedStatement preparedStatement = conn.prepareStatement(insertSql);
+                boolean execute = preparedStatement.execute();
+                if (execute) {
+                    return sb.toString();
+                }else{
                     return "0";
                 }
             }
-        } catch (IOException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        String time = String.valueOf(new Date().getTime());
-        char[] chars = time.toCharArray();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 5; i <= 12; i++) {
-            sb.append(chars[i]);
-        }
-        String txt = username+"@"+password+"@"+sb.toString();
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(txt.getBytes());
-            fileOutputStream.flush();
-            fileOutputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return sb.toString();
     }
 
     @Override
     @ApiOperation("登录")
     public String login(String username, String password) {
-        File file = new File("../../../../../../../../user.txt");
-        try {
-            List<String> strings = Files.readAllLines(file.toPath());
-            for (String string : strings) {
-                String[] split = string.split("@");
-                if (username.equals(split[0]) && password.equals(split[1])){
-                    return split[2];
+        try(Connection conn = SqlUtil.makeConnection()) {
+            String sql = "select * from user where username=" + username ;
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                if (rs.getString("username").equals(username) && rs.getString("password").equals(password)) {
+                    return rs.getString("id");
                 }
             }
-        } catch (IOException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return "0";
