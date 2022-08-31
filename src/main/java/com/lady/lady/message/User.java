@@ -18,6 +18,13 @@ public class User implements IUser{
     @ApiOperation("注册")
     public String register(String username, String password) {
         File file = new File("/home/lighthou/user.txt");
+        if (!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         try {
             List<String> strings = Files.readAllLines(file.toPath());
             for (String string : strings) {
