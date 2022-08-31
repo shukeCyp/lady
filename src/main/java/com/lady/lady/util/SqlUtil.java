@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class SqlUtil {
 
-    private static final String URL = "jdbc:mysql://bj-cynosdbmysql-grp-irua0syg.sql.tencentcdb.com:26843/shuke?serverTimezone=GMT";
+    private static final String URL = "jdbc:mysql://10.0.8.15:3306/shuke?serverTimezone=GMT";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "Abc@123456";
 
