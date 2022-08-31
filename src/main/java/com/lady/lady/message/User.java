@@ -17,7 +17,7 @@ public class User implements IUser{
     @Override
     @ApiOperation("注册")
     public String register(String username, String password) {
-        File file = new File("/home/lighthou/user.txt");
+        File file = new File("../../../../../../../../user.txt");
         if (!file.exists()){
             try {
                 file.createNewFile();
@@ -57,7 +57,7 @@ public class User implements IUser{
     @Override
     @ApiOperation("登录")
     public String login(String username, String password) {
-        File file = new File("/home/lighthou/user.txt");
+        File file = new File("../../../../../../../../user.txt");
         try {
             List<String> strings = Files.readAllLines(file.toPath());
             for (String string : strings) {
